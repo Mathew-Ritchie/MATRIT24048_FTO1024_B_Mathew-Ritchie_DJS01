@@ -1,65 +1,103 @@
-/**
- * Debugging Guide
- * 1. Make the code more readable
- * 2. Pick up calculation errors
- * 3. Make these calculations robust such that the calculation does not give an incorrect result, it throws an error to the user if something has gone wrong (parameter used with an incorrect unit of measurement, etc)
- */
-
-const accelerationConversionFactor = 3.6;
+const ACCELERATION_CONVERSION_FACTOR = 3.6; //convert m/s^2 to km/h^2
+const TIME_CONVERSION_FACTOR = 3600; //convert seconds to hours
 
 // Given Parameters
-const initialVelocity = {
+const initialVelocityKmHour = {
   value: 10000,
   measurement: "km/h",
-}; // velocity (km/h)
-const acceleration = 3; // acceleration (m/s^2)
-const timeAsSeconds = 3600; // seconds (1 hour)
-const initialDistance = 0; // distance (km)
-const initialFuel = 5000; // remaining fuel (kg)
-const fuelBurnRate = 0.5; // fuel burn rate (kg/s)
+};
+const accelerationMetersSecondSquared = {
+  value: 3,
+  measurement: "m/s^2",
+};
+const timeAsSeconds = {
+  value: 3600,
+  measurement: "seconds",
+};
+const initialDistanceKm = {
+  value: 0,
+  measurement: "km",
+};
+const initialFuelKg = {
+  value: 5000,
+  measurement: "kg",
+};
+const fuelBurnRateKgSecond = {
+  value: 0.5,
+  measurement: "kg/s",
+};
 
-const timeAsHour = timeAsSeconds / 60 / 60;
+const calcNewDistance = (props) => {
+  const { initialDistanceKm, initialVelocityKmHour, timeAsSeconds } = props;
 
-const newDistance = initialDistance + initialVelocity.value * timeAsHour; //calcultes new distance
-const remainingFuel = initialFuel - fuelBurnRate * timeAsSeconds; //calculates remaining fuel
+  if (initialDistanceKm.value < 0 || initialDistanceKm.measurement !== "km")
+    throw new Error('"initialDistanceKm" error, either no value or incorrect measuring unit');
+  if (!initialVelocityKmHour.value || initialVelocityKmHour.measurement !== "km/h")
+    throw new Error('velocity" error, either no value or incorrect measuring unit');
+  if (!timeAsSeconds.value || timeAsSeconds.measurement !== "seconds")
+    throw new Error('"TimeAsSeconds" error, either no value or incorrect measuring unit');
+
+  const timeAsHours =
+    timeAsSeconds.measurement === "seconds"
+      ? timeAsSeconds.value / TIME_CONVERSION_FACTOR
+      : console.error("Time not given in seconds");
+
+  return initialDistanceKm.value + initialVelocityKmHour.value * timeAsHours;
+};
 
 // Pick up an error with how the function below is called and make it robust to such errors
 
-const calcNewVel = (props) => {
+const calcNewVelocity = (props) => {
   const { acceleration, time, velocity } = props;
-  const { value, measurement } = velocity;
-  console.log(props);
-  if (!acceleration) throw new Error('"Acceleration" not added');
-  if (!time) throw new Error('"time" in seconds not added');
-  if (!velocity) throw new Error('"initial" velocity not added');
-  if (!value) throw new Error('"Value" not added');
-  if (!measurement) throw new Error('"Measurement" not added');
-
-  if (measurement !== "km/h") {
-    throw new Error('"measurement" is required to be in "km/h"');
-  }
+  //const { value, measurement } = velocity;
+  //console.log(props);
+  if (!acceleration.value || acceleration.measurement !== "m/s^2")
+    throw new Error('"Acceleration" error, either no value or incorrect measuring unit');
+  if (!time.value || time.measurement !== "seconds")
+    throw new Error('time" error, either no value or incorrect measuring unit');
+  if (!velocity.value || velocity.measurement !== "km/h")
+    throw new Error('"velocity" error, either no value or incorrect measuring unit');
 
   const velocityAsMetersSeconds =
-    measurement === "km/h"
-      ? value / accelerationConversionFactor
+    velocity.measurement === "km/h"
+      ? velocity.value / ACCELERATION_CONVERSION_FACTOR
       : console.error("Velocity not km/h");
-  console.log(velocityAsMetersSeconds);
-  return (velocityAsMetersSeconds + acceleration * time) * accelerationConversionFactor;
+  //console.log(velocityAsMetersSeconds);
+  return (
+    (velocityAsMetersSeconds + acceleration.value * time.value) * ACCELERATION_CONVERSION_FACTOR
+  );
 };
 
-// const calcNewVel = (initialVelocity, acceleration, timeAsSeconds) => {
-//   initialVelocity = initialVelocity * (1000 / 1) * (1 / 3600);
+const calcRemainingFuel = (props) => {
+  const { initialFuelKg, fuelBurnRateKgSecond, timeAsSeconds } = props;
 
-//   initialVelocity = initialVelocity + acceleration * timeAsSeconds;
+  if (!initialFuelKg.value || initialFuelKg.measurement !== "kg")
+    throw new Error('"initial fuel" error, either no value or incorrect measuring unit');
+  if (!fuelBurnRateKgSecond.value || fuelBurnRateKgSecond.measurement !== "kg/s")
+    throw new Error('fuel burn rate" error, either no value or incorrect measuring unit');
+  if (!timeAsSeconds.value || timeAsSeconds.measurement !== "seconds")
+    throw new Error('"time" error, either no value or incorrect measuring unit');
 
-//   return initialVelocity * (timeAsSeconds / 1) * (1 / 1000);
-// };
+  return initialFuelKg.value - fuelBurnRateKgSecond.value * timeAsSeconds.value;
+};
 
-const newVelocity = calcNewVel({
-  acceleration: acceleration,
+const newVelocity = calcNewVelocity({
+  acceleration: accelerationMetersSecondSquared,
   time: timeAsSeconds,
-  velocity: initialVelocity,
+  velocity: initialVelocityKmHour,
 }); //calculates new velocity based on acceleration
+
+const newDistance = calcNewDistance({
+  initialDistanceKm: initialDistanceKm,
+  initialVelocityKmHour: initialVelocityKmHour,
+  timeAsSeconds: timeAsSeconds,
+});
+
+const remainingFuel = calcRemainingFuel({
+  initialFuelKg: initialFuelKg,
+  fuelBurnRateKgSecond: fuelBurnRateKgSecond,
+  timeAsSeconds: timeAsSeconds,
+});
 
 console.log(`Corrected New Velocity: ${newVelocity} km/h`);
 console.log(`Corrected New Distance: ${newDistance} km`);
