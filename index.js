@@ -30,11 +30,14 @@ const fuelBurnRateKgSecond = {
 const calcNewDistance = (props) => {
   const { initialDistanceKm, initialVelocityKmHour, timeAsSeconds } = props;
 
-  if (initialDistanceKm.value < 0 || initialDistanceKm.measurement !== "km")
+  if (typeof initialDistanceKm.value !== "number" || initialDistanceKm.measurement !== "km")
     throw new Error('"initialDistanceKm" error, either no value or incorrect measuring unit');
-  if (!initialVelocityKmHour.value || initialVelocityKmHour.measurement !== "km/h")
+  if (
+    typeof initialVelocityKmHour.value !== "number" ||
+    initialVelocityKmHour.measurement !== "km/h"
+  )
     throw new Error('velocity" error, either no value or incorrect measuring unit');
-  if (!timeAsSeconds.value || timeAsSeconds.measurement !== "seconds")
+  if (typeof timeAsSeconds.value !== "number" || timeAsSeconds.measurement !== "seconds")
     throw new Error('"TimeAsSeconds" error, either no value or incorrect measuring unit');
 
   const timeAsHours =
@@ -51,11 +54,11 @@ const calcNewVelocity = (props) => {
   const { acceleration, time, velocity } = props;
   //const { value, measurement } = velocity;
   //console.log(props);
-  if (!acceleration.value || acceleration.measurement !== "m/s^2")
+  if (typeof acceleration.value !== "number" || acceleration.measurement !== "m/s^2")
     throw new Error('"Acceleration" error, either no value or incorrect measuring unit');
-  if (!time.value || time.measurement !== "seconds")
+  if (typeof time.value !== "number" || time.measurement !== "seconds")
     throw new Error('time" error, either no value or incorrect measuring unit');
-  if (!velocity.value || velocity.measurement !== "km/h")
+  if (typeof velocity.value !== "number" || velocity.measurement !== "km/h")
     throw new Error('"velocity" error, either no value or incorrect measuring unit');
 
   const velocityAsMetersSeconds =
@@ -71,11 +74,11 @@ const calcNewVelocity = (props) => {
 const calcRemainingFuel = (props) => {
   const { initialFuelKg, fuelBurnRateKgSecond, timeAsSeconds } = props;
 
-  if (!initialFuelKg.value || initialFuelKg.measurement !== "kg")
+  if (typeof initialFuelKg.value !== "number" || initialFuelKg.measurement !== "kg")
     throw new Error('"initial fuel" error, either no value or incorrect measuring unit');
-  if (!fuelBurnRateKgSecond.value || fuelBurnRateKgSecond.measurement !== "kg/s")
+  if (typeof fuelBurnRateKgSecond.value !== "number" || fuelBurnRateKgSecond.measurement !== "kg/s")
     throw new Error('fuel burn rate" error, either no value or incorrect measuring unit');
-  if (!timeAsSeconds.value || timeAsSeconds.measurement !== "seconds")
+  if (typeof timeAsSeconds.value !== "number" || timeAsSeconds.measurement !== "seconds")
     throw new Error('"time" error, either no value or incorrect measuring unit');
 
   return initialFuelKg.value - fuelBurnRateKgSecond.value * timeAsSeconds.value;
